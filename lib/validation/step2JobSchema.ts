@@ -3,9 +3,8 @@ import { addDays, isBefore, isWeekend } from "date-fns";
 
 export const step2JobSchema = z
   .object({
-    department: z.enum(["Engineering", "Marketing", "Sales", "HR", "Finance"], {
-      required_error: "Department is required",
-    }),
+    department: z.enum(["Engineering", "Marketing", "Sales", "HR", "Finance"])
+      .refine((val) => !!val, { message: "Department is required" }),
     positionTitle: z.string().min(3, "Position title must be at least 3 characters"),
     startDate: z.string(),
     jobType: z.enum(["Full-time", "Part-time", "Contract"]),
@@ -13,7 +12,6 @@ export const step2JobSchema = z
     managerId: z.string().min(1, "Manager is required"),
   })
   .superRefine((data, ctx) => {
-    // Validate startDate
     const date = new Date(data.startDate);
     const today = new Date();
     const maxFuture = addDays(today, 90);
@@ -51,7 +49,7 @@ export const step2JobSchema = z
       }
     }
 
-    // Validate salary
+    // salary validations
     if (data.jobType === "Full-time" && (data.salary < 30000 || data.salary > 200000)) {
       ctx.addIssue({
         path: ["salary"],

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useFormContext, Controller } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { Button } from "../ui/button";
 
 type FileUploadFieldProps = {
@@ -27,7 +27,7 @@ export default function FileUploadField({
       url = URL.createObjectURL(file);
       setPreview(url);
     } else if (typeof file === "string") {
-      setPreview(file); // if value is already a URL
+      setPreview(file);
     } else {
       setPreview(null);
     }

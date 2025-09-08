@@ -7,15 +7,9 @@ import { addDays, format } from "date-fns";
 import { Button } from "../../../components/ui/button";
 import { step2JobSchema, Step2JobType } from "@/lib/validation/step2JobSchema";
 import { mockManagers } from "@/lib/mockData";
-import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import FormInputField from "@/components/FormFields/FormInputField";
+import { FormSelectField } from "@/components/FormFields/FormSelectField";
 
 type Props = {
   defaultValues?: Step2JobType;
@@ -24,14 +18,7 @@ type Props = {
 };
 
 export default function Step2Job({ defaultValues, onNext, onBack }: Props) {
-  const {
-    register,
-    handleSubmit,
-    control,
-    watch,
-    formState: { errors },
-    setValue,
-  } = useForm<Step2JobType>({
+  const methods = useForm<Step2JobType>({
     resolver: zodResolver(step2JobSchema),
     defaultValues: defaultValues || {
       department: "Engineering",
@@ -43,6 +30,15 @@ export default function Step2Job({ defaultValues, onNext, onBack }: Props) {
     },
   });
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors },
+    setValue,
+  } = methods;
+
   const department = watch("department");
   const jobType = watch("jobType");
 
@@ -51,7 +47,6 @@ export default function Step2Job({ defaultValues, onNext, onBack }: Props) {
   useEffect(() => {
     const managers = mockManagers.filter((m) => m.department === department);
     setFilteredManagers(managers);
-    // Reset managerId if department changed
     setValue("managerId", "");
   }, [department, setValue]);
 
@@ -60,125 +55,87 @@ export default function Step2Job({ defaultValues, onNext, onBack }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div>
-        <label className="block font-medium">Department</label>
-        <Controller
-          control={control}
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <FormSelectField
           name="department"
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Relationship" />
-              </SelectTrigger>
-              <SelectContent>
-                {["Engineering", "Marketing", "Sales", "HR", "Finance"].map(
-                  (item) => (
-                    <SelectItem key={item} value={item}>
-                      {" "}
-                      {item}
-                    </SelectItem>
-                  )
-                )}
-              </SelectContent>
-            </Select>
-          )}
-        />
-        {errors.department && (
-          <p className="text-red-500 text-sm">{errors.department.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block font-medium">Position Title</label>
-        <Input {...register("positionTitle")} placeholder="Software Engineer" />
-        {errors.positionTitle && (
-          <p className="text-red-500 text-sm">{errors.positionTitle.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block font-medium">Start Date</label>
-        <Controller
+          label="Department"
           control={control}
+          options={[
+            { value: "Engineering", label: "Engineering" },
+            { value: "Marketing", label: "Marketing" },
+            { value: "Sales", label: "Sales" },
+            { value: "HR", label: "HR" },
+            { value: "Finance", label: "Finance" },
+          ]}
+          placeholder="Select Department"
+        />
+
+        <FormInputField
+          name="positionTitle"
+          label="Position Title"
+          placeholder="Software Engineer"
+          required
+        />
+
+        <FormInputField
           name="startDate"
-          render={({ field }) => (
-            <Input
-              type="date"
-              {...field}
-              value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-              min={format(new Date(), "yyyy-MM-dd")}
-              max={format(addDays(new Date(), 90), "yyyy-MM-dd")}
-            />
-          )}
+          type="date"
+          label="Start Date"
+          required
+          min={format(new Date(), "yyyy-MM-dd")}
+          max={format(addDays(new Date(), 90), "yyyy-MM-dd")}
         />
-        {errors.startDate && (
-          <p className="text-red-500 text-sm">{errors.startDate.message}</p>
-        )}
-      </div>
 
-      <div>
-        <label className="block font-medium">Job Type</label>
-        <Controller
-          control={control}
-          name="jobType"
-          render={({ field }) => (
-            <RadioGroup {...field}>
-              {["Full-time", "Part-time", "Contract"].map((type) => (
-                <div key={type} className="flex items-center space-x-2">
-                  <RadioGroupItem value={type} />
-                  <span>{type}</span>
-                </div>
-              ))}
-            </RadioGroup>
-          )}
-        />
-        {errors.jobType && (
-          <p className="text-red-500 text-sm">{errors.jobType.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block font-medium">
-          {jobType === "Contract" ? "Hourly Rate ($)" : "Annual Salary ($)"}
-        </label>
-        <Input type="number" {...register("salary", { valueAsNumber: true })} />
-        {errors.salary && (
-          <p className="text-red-500 text-sm">{errors.salary.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block font-medium">Manager</label>
-        <Controller
-          control={control}
-          name="managerId"
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Manager" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredManagers.map((item) => (
-                  <SelectItem key={item.id} value={item.id}>
-                    {item.name}
-                  </SelectItem>
+        <div>
+          <label className="block font-medium">Job Type</label>
+          <Controller
+            control={control}
+            name="jobType"
+            render={({ field }) => (
+              <RadioGroup {...field}>
+                {["Full-time", "Part-time", "Contract"].map((type) => (
+                  <div key={type} className="flex items-center space-x-2">
+                    <RadioGroupItem value={type} />
+                    <span>{type}</span>
+                  </div>
                 ))}
-              </SelectContent>
-            </Select>
+              </RadioGroup>
+            )}
+          />
+          {errors.jobType && (
+            <p className="text-red-500 text-sm">{errors.jobType.message}</p>
           )}
-        />
-        {errors.managerId && (
-          <p className="text-red-500 text-sm">{errors.managerId.message}</p>
-        )}
-      </div>
+        </div>
 
-      <div className="flex justify-between">
-        <Button type="button" variant="secondary" onClick={onBack}>
-          Back
-        </Button>
-        <Button type="submit">Next</Button>
-      </div>
-    </form>
+        <FormInputField
+          name="salary"
+          type="number"
+          label={
+            jobType === "Contract" ? "Hourly Rate ($)" : "Annual Salary ($)"
+          }
+          placeholder=""
+          required
+        />
+
+        <FormSelectField
+          name="managerId"
+          label="Manager"
+          control={control}
+          options={filteredManagers.map((m) => ({
+            value: m.id,
+            label: m.name,
+          }))}
+          placeholder="Select Manager"
+        />
+
+        <div className="flex justify-between">
+          <Button type="button" variant="secondary" onClick={onBack}>
+            Back
+          </Button>
+          <Button type="submit">Next</Button>
+        </div>
+      </form>
+    </FormProvider>
   );
 }
