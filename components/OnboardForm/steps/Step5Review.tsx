@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   step5ReviewSchema,
@@ -23,6 +23,7 @@ export default function Step5Review({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<Step5ReviewType>({
     resolver: zodResolver(step5ReviewSchema),
@@ -61,9 +62,15 @@ export default function Step5Review({
       </div>
 
       <div>
-        <Checkbox {...register("confirm")}>
-          I confirm all information is correct
-        </Checkbox>
+        <Controller
+          name="confirm"
+          control={control}
+          render={({ field }) => (
+            <Checkbox checked={field.value} onCheckedChange={field.onChange}>
+              I confirm all information is correct
+            </Checkbox>
+          )}
+        />
         {errors.confirm && (
           <p className="text-red-500 text-sm">{errors.confirm.message}</p>
         )}

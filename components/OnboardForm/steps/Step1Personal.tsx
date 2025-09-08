@@ -13,6 +13,7 @@ import {
   Step1PersonalType,
 } from "@/lib/validation/step1PersonalSchema";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 type Props = {
   defaultValues?: Step1PersonalType;
@@ -25,6 +26,7 @@ export default function Step1Personal({ defaultValues, onNext }: Props) {
     handleSubmit,
     control,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<Step1PersonalType>({
     resolver: zodResolver(step1PersonalSchema),
@@ -49,17 +51,25 @@ export default function Step1Personal({ defaultValues, onNext }: Props) {
   };
 
   const [preview, setPreview] = useState<string | null>(null);
-  const profilePicture = watch("profilePicture");
 
-  useEffect(() => {
-    if (profilePicture && profilePicture instanceof File) {
-      const url = URL.createObjectURL(profilePicture);
-      setPreview(url);
-      return () => URL.revokeObjectURL(url);
-    } else {
-      setPreview(null);
+  const file = watch("profilePicture");
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      if (selectedFile.size > 2 * 1024 * 1024) {
+        alert("File must be less than 2MB");
+        return;
+      }
+      setValue("profilePicture", selectedFile, { shouldValidate: true });
+      setPreview(URL.createObjectURL(selectedFile));
     }
-  }, [profilePicture]);
+  };
+
+  const removeFile = () => {
+    setValue("profilePicture", null, { shouldValidate: true });
+    setPreview(null);
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -110,20 +120,36 @@ export default function Step1Personal({ defaultValues, onNext }: Props) {
         )}
       </div>
 
-      <div>
+      <div className="space-y-2">
         <label className="block font-medium">Profile Picture (optional)</label>
         <input
           type="file"
-          {...register("profilePicture")}
-          accept="image/png, image/jpeg"
+          accept="image/jpeg,image/png"
+          onChange={handleFileChange}
         />
-        {preview && (
-          <img src={preview} className="mt-2 w-32 h-32 object-cover rounded" />
-        )}
         {errors.profilePicture && (
           <p className="text-red-500 text-sm">
-            {errors.profilePicture.message}
+            {errors.profilePicture.message as string}
           </p>
+        )}
+
+        {preview && (
+          <div className="mt-2 flex flex-col items-start gap-2">
+            <Image
+              src={preview}
+              alt="Profile Preview"
+              width={120}
+              height={120}
+              className="rounded-full object-cover border"
+            />
+            <button
+              type="button"
+              onClick={removeFile}
+              className="text-sm text-red-600 hover:underline"
+            >
+              Remove
+            </button>
+          </div>
         )}
       </div>
 

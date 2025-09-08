@@ -36,7 +36,7 @@ export default function OnboardForm() {
   useUnsavedChangesWarning(step < totalSteps);
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-3xl mx-auto">
       <StepIndicator currentStep={step} />
       <Progress step={step} totalSteps={totalSteps} />
 

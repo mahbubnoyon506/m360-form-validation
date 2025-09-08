@@ -2,8 +2,7 @@
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import {
   step3SkillsSchema,
@@ -17,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 type Props = {
   defaultValues?: Step3SkillsType;
-  department: string;
+  department: keyof typeof skillsByDepartment; // ✅ restrict to valid keys
   onNext: (data: Step3SkillsType) => void;
   onBack: () => void;
 };
@@ -57,7 +56,7 @@ export default function Step3Skills({
 
   const availableSkills = skillsByDepartment[department] || [];
 
-  // Automatically add managerApproved field if remotePreference > 50%
+  // ✅ Ensure managerApproved is controlled properly
   useEffect(() => {
     if (remotePreference > 50) {
       setValue("managerApproved", watch("managerApproved") || false);
@@ -72,36 +71,40 @@ export default function Step3Skills({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Primary Skills */}
       <div>
         <label className="block font-medium mb-2">
           Primary Skills (Select at least 3)
         </label>
         <div className="grid grid-cols-2 gap-2">
-          {availableSkills.map((skill) => (
-            <div key={skill} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                value={skill}
-                {...register("primarySkills")}
-                checked={
-                  Array.isArray(primarySkills) && primarySkills.includes(skill)
-                }
-              />
-              <span>{skill}</span>
-            </div>
-          ))}
+          {availableSkills.map(
+            (
+              skill: string // ✅ explicit type
+            ) => (
+              <div key={skill} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  value={skill}
+                  {...register("primarySkills")}
+                  checked={primarySkills.includes(skill)}
+                />
+                <span>{skill}</span>
+              </div>
+            )
+          )}
         </div>
         {errors.primarySkills && (
           <p className="text-red-500 text-sm">{errors.primarySkills.message}</p>
         )}
       </div>
 
+      {/* Experience for each skill */}
       {primarySkills.length > 0 && (
         <div>
           <label className="block font-medium mb-2">
             Experience (years) for each skill
           </label>
-          {primarySkills.map((skill) => (
+          {primarySkills.map((skill: string) => (
             <div key={skill} className="flex items-center space-x-2 mb-2">
               <span className="w-32">{skill}</span>
               <Input
@@ -117,6 +120,7 @@ export default function Step3Skills({
         </div>
       )}
 
+      {/* Working Hours */}
       <div>
         <label className="block font-medium mb-2">
           Preferred Working Hours
@@ -131,6 +135,7 @@ export default function Step3Skills({
         )}
       </div>
 
+      {/* Remote Work Preference */}
       <div>
         <label className="block font-medium mb-2">
           Remote Work Preference (%)
@@ -143,15 +148,22 @@ export default function Step3Skills({
         />
       </div>
 
+      {/* Manager Approval */}
       {remotePreference > 50 && (
         <div>
           <Controller
             name="managerApproved"
             control={control}
             render={({ field }) => (
-              <Checkbox {...field}>
-                {field.value ? "Manager Approved ✅" : "Manager Approved"}
-              </Checkbox>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  checked={field.value} // ✅ correct type
+                  onCheckedChange={(checked) => field.onChange(checked)}
+                />
+                <span>
+                  {field.value ? "Manager Approved ✅" : "Manager Approved"}
+                </span>
+              </div>
             )}
           />
           {errors.managerApproved && (
@@ -162,6 +174,7 @@ export default function Step3Skills({
         </div>
       )}
 
+      {/* Extra Notes */}
       <div>
         <label className="block font-medium mb-2">
           Extra Notes (optional, max 500 chars)
@@ -173,6 +186,7 @@ export default function Step3Skills({
         />
       </div>
 
+      {/* Navigation Buttons */}
       <div className="flex justify-between">
         <Button type="button" variant="secondary" onClick={onBack}>
           Back
