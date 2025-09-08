@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Onboard Form Project
 
-## Getting Started
+Explore the live demo here: [Employee Onboarding Form](https://employee-onboarding-m360.netlify.app/)
 
-First, run the development server:
+This is a multi-step onboarding form built with **Next.js**, **React**, **React Hook Form**, **Zod**, and **shadcn/ui** components. It demonstrates a complex form workflow with proper validations, file uploads, and dynamic field handling.
+
+---
+
+## How to Run the Project
+
+### Prerequisites
+
+- Node.js >= 18
+- npm or yarn
+- Git
+
+### Steps
+
+1. Clone the repository:
 
 ```bash
+git clone https://github.com/mahbubnoyon506/m360-form-validation
+cd m360-form-validation
+Install dependencies:
+
+npm install
+# or
+yarn install
+
+Run the development server:
+
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Open your browser at http://localhost:3000
+
+To build for production:
+
+npm run build
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Complex Logic Handling:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Multi-Step Form
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The form is divided into 5 steps: Personal, Job, Skills, Emergency, Review.
 
-## Learn More
+State is preserved across steps using React useState.
 
-To learn more about Next.js, take a look at the following resources:
+Navigation between steps is handled via nextStep and prevStep functions.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Form Validation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Used Zod schemas for strict and user-friendly validation.
 
-## Deploy on Vercel
+Each step has a dedicated schema (Step1Personal, Step2Job, Step3Skills).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Validation messages are customized for user clarity.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Age check (minimum 18 years)
+
+Salary range based on job type
+
+Start date restrictions (cannot be past, weekend restrictions for certain departments, max 90 days in future)
+
+Working hours check (start < end)
+
+Reusable Components
+
+Assumptions:
+Users must be at least 18 years old.
+
+HR and Finance cannot have start dates on weekends.
+
+Salary ranges differ for full-time, part-time, and contract positions.
+
+Profile picture is optional but must be JPG/PNG and ≤ 2MB if uploaded.
+
+Phone numbers follow the format: +<country code>-xxx-xxx-xxxx.
+
+Multi-step form persists state only during the session; no backend persistence implemented.
+
+TypeScript any is allowed for dynamic or complex objects where strict typing is not feasible.
+
+Date fields are received as strings in ISO format.
