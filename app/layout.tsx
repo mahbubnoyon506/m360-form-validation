@@ -1,4 +1,3 @@
-// app/layout.tsx
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -16,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className + " bg-gray-50 text-gray-900"}>
         <main className="min-h-screen flex items-center justify-center p-6">
           <div className="w-full max-w-3xl bg-white shadow-lg rounded-2xl p-3 md:p-6">

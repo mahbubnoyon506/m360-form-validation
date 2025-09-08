@@ -8,6 +8,7 @@ import {
 } from "@/lib/validation/step5ReviewSchema";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 type Props = {
   formData: any;
@@ -66,9 +67,16 @@ export default function Step5Review({
           name="confirm"
           control={control}
           render={({ field }) => (
-            <Checkbox checked={field.value} onCheckedChange={field.onChange}>
-              I confirm all information is correct
-            </Checkbox>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={(checked) => field.onChange(checked)}
+                id="confirm"
+              />
+              <Label htmlFor="confirm">
+                I confirm all information is correct
+              </Label>
+            </div>
           )}
         />
         {errors.confirm && (

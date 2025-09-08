@@ -1,14 +1,10 @@
-// app/onboarding/steps/Step2Job.tsx
 "use client";
 
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { useEffect, useState } from "react";
 import { addDays, format } from "date-fns";
-
 import { Button } from "../../../components/ui/button";
-
 import { step2JobSchema, Step2JobType } from "@/lib/validation/step2JobSchema";
 import { mockManagers } from "@/lib/mockData";
 import { Input } from "@/components/ui/input";

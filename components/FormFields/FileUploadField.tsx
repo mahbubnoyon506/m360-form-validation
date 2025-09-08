@@ -1,86 +1,71 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import { useFormContext } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useFormContext, Controller } from "react-hook-form";
+import { Button } from "../ui/button";
 
-interface FileUploadFieldProps {
+type FileUploadFieldProps = {
   name: string;
   label?: string;
   accept?: string;
   maxSizeMB?: number;
-  preview?: boolean;
-}
+};
 
 export default function FileUploadField({
   name,
-  label = "Upload File",
-  accept = "image/jpeg,image/png",
+  label,
+  accept,
   maxSizeMB = 2,
-  preview = true,
 }: FileUploadFieldProps) {
-  const {
-    setValue,
-    watch,
-    formState: { errors },
-  } = useFormContext();
+  const { control, setValue, watch } = useFormContext();
   const file = watch(name);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
-  // Generate preview when file changes
   useEffect(() => {
+    let url: string | undefined;
     if (file instanceof File) {
-      const objectUrl = URL.createObjectURL(file);
-      setPreviewUrl(objectUrl);
-      return () => URL.revokeObjectURL(objectUrl);
+      url = URL.createObjectURL(file);
+      setPreview(url);
+    } else if (typeof file === "string") {
+      setPreview(file); // if value is already a URL
+    } else {
+      setPreview(null);
     }
-    setPreviewUrl(null);
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
   }, [file]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      if (selectedFile.size > maxSizeMB * 1024 * 1024) {
-        alert(`File must be less than ${maxSizeMB}MB`);
-        return;
-      }
-      setValue(name, selectedFile, { shouldValidate: true });
+    if (!selectedFile) return;
+
+    if (selectedFile.size > maxSizeMB * 1024 * 1024) {
+      alert(`File must be smaller than ${maxSizeMB} MB`);
+      return;
     }
+
+    setValue(name, selectedFile, { shouldValidate: true });
   };
 
   const removeFile = () => {
     setValue(name, null, { shouldValidate: true });
-    setPreviewUrl(null);
   };
 
   return (
     <div className="space-y-2">
       {label && <label className="block font-medium">{label}</label>}
-
-      <input type="file" accept={accept} onChange={handleFileChange} />
-
-      {errors[name] && (
-        <p className="text-red-500 text-sm">
-          {errors[name]?.message as string}
-        </p>
-      )}
-
-      {preview && previewUrl && (
+      <input type="file" accept={accept} onChange={handleChange} />
+      {preview && (
         <div className="mt-2 flex flex-col items-start gap-2">
-          <Image
-            src={previewUrl}
+          <img
+            src={preview}
             alt="Preview"
-            width={120}
-            height={120}
-            className="rounded-full object-cover border"
+            className="w-24 h-24 rounded-full object-cover border"
           />
-          <button
-            type="button"
-            onClick={removeFile}
-            className="text-sm text-red-600 hover:underline"
-          >
+          <Button type="button" variant="secondary" onClick={removeFile}>
             Remove
-          </button>
+          </Button>
         </div>
       )}
     </div>
